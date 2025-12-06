@@ -6,4 +6,14 @@ function CatchAsyncError(fn: RequestHandler) {
     };
 }
 
+// function CatchAsyncError(fn: RequestHandler) {
+//     return async function (req: Request, res: Response, next: NextFunction) {
+//         try {
+//             await fn(req, res, next);
+//         } catch (error) {
+//             next(error);
+//         }
+//     };
+// }
+
 export default CatchAsyncError;

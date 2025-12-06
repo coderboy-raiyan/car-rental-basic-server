@@ -21,4 +21,5 @@ app.use('/api/v1', router);
 
 // errors
 app.use(globalErrorHandler);
+
 export default app;

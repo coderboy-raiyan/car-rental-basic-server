@@ -2,13 +2,26 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import config from '../config';
+import AppError from '../error/AppError';
 
 function globalErrorHandler(err: any, req: Request, res: Response, next: NextFunction) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+    let statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
+    let message = 'Something went wrong!';
+    let errors = [];
+    if (err instanceof AppError) {
+        statusCode = err?.statusCode;
+        message = err?.message;
+        errors = [
+            {
+                path: '',
+                message: err?.message,
+            },
+        ];
+    }
+    return res.status(statusCode).json({
         success: false,
-        message: 'Something went wrong!!',
-        err: config?.NODE_ENV !== 'production' && err,
+        message,
+        errors,
     });
 }
 
