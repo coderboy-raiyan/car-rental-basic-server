@@ -1,101 +1,134 @@
-# Node + TS + Express + Bun - Starter
+# 🚗 Vehicle Rental System
 
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
+## 🎯 Project Overview
 
-## Project Overview
+A backend API for a vehicle rental management system that handles:
 
-A minimal Node.js + Express server written in TypeScript, designed to run with Bun runtime. Uses MongoDB (via Mongoose) for data persistence.
+- **Vehicles** - Manage vehicle inventory with availability tracking
+- **Customers** - Manage customer accounts and profiles
+- **Bookings** - Handle vehicle rentals, returns and cost calculation
+- **Authentication** - Secure role-based access control (Admin and Customer roles)
 
-## Runtime & Package Manager
+---
 
-This project uses **Bun** as both the runtime and package manager (not npm/yarn/pnpm).
+## 🛠️ Technology Stack
 
-- Install dependencies: `bun install`
-- All scripts run via `bun run <script>`
+- **Node.js** + **TypeScript**
+- **Express.js** (web framework)
+- **PostgreSQL** (database)
+- **bcrypt** (password hashing)
+- **jsonwebtoken** (JWT authentication)
 
-## Development Commands
+---
 
-### Running the Server
-```bash
-bun run dev          # Development mode with hot-reload (watches src/server.ts)
-bun run build        # Build for production (outputs to ./dist)
-bun run start        # Run production build (requires Node.js)
-```
+## 📁 Code Structure
 
-### Code Quality
-```bash
-bun run lint         # Run ESLint
-bun run lint:fix     # Auto-fix ESLint issues
-bun run format       # Format all TypeScript files with Prettier
-bun run format:check # Check Prettier formatting without changes
-bun run typecheck    # Type-check without emitting files
-```
+> **IMPORTANT:** Your implementation **MUST** follow a **modular pattern** with clear separation of concerns. Organize your code into feature-based modules (e.g., auth, users, vehicles, bookings) with proper layering (routes, controllers, services).
 
-## Architecture
+---
 
-### Entry Points
-- **`src/server.ts`**: Application bootstrap - connects to MongoDB and starts HTTP server
-- **`src/app.ts`**: Express application configuration with middleware setup
-- **`src/config/index.ts`**: Environment configuration loader (from `.env`)
+## 📊 Database Tables
 
-### Application Flow
-1. `server.ts` imports the Express app from `app.ts`
-2. Establishes MongoDB connection via Mongoose
-3. Creates HTTP server and listens on configured PORT
-4. Express app has CORS enabled with `origin: '*'` and credentials support
+### Users
 
-### Project Structure
-```
-src/
-├── server.ts          # Bootstrap & database connection
-├── app.ts             # Express app & middleware
-└── config/
-    └── index.ts       # Environment variables
-```
+| Field    | Notes                       |
+| -------- | --------------------------- |
+| id       | Auto-generated              |
+| name     | Required                    |
+| email    | Required, unique, lowercase |
+| password | Required, min 6 characters  |
+| phone    | Required                    |
+| role     | 'admin' or 'customer'       |
 
-### Middleware Stack (in order)
-1. `express.json()` - Body parsing
-2. `cookie-parser` - Cookie parsing
-3. `cors` - CORS with credentials enabled
+### Vehicles
 
-### Environment Variables
-Required in `.env`:
-- `PORT` - Server port (default: 5000)
-- `NODE_ENV` - Environment (e.g., "development")
-- `DB_URI` - MongoDB connection string
+| Field               | Notes                         |
+| ------------------- | ----------------------------- |
+| id                  | Auto-generated                |
+| vehicle_name        | Required                      |
+| type                | 'car', 'bike', 'van' or 'SUV' |
+| registration_number | Required, unique              |
+| daily_rent_price    | Required, positive            |
+| availability_status | 'available' or 'booked'       |
 
-## Code Style
+### Bookings
 
-### ESLint Rules
-- Unused variables error (except those prefixed with `_`)
-- `no-explicit-any` is a warning, not an error
-- `prefer-const` enforced
-- `no-console` is a warning (use sparingly)
+| Field           | Notes                               |
+| --------------- | ----------------------------------- |
+| id              | Auto-generated                      |
+| customer_id     | Links to Users table                |
+| vehicle_id      | Links to Vehicles table             |
+| rent_start_date | Required                            |
+| rent_end_date   | Required, must be after start date  |
+| total_price     | Required, positive                  |
+| status          | 'active', 'cancelled' or 'returned' |
 
-### Prettier Configuration
-- Single quotes
-- Semicolons required
-- Tab width: 4 spaces
-- Print width: 100 characters
-- Arrow function parens: avoid when possible
-- Trailing commas: ES5 style
+---
 
-## Technical Details
+## 🔐 Authentication & Authorization
 
-### TypeScript Configuration
-- Target: ES2022
-- Module: ESNext with bundler resolution
-- Strict mode enabled
-- Types: bun-types, node
+### User Roles
 
-### Dependencies
-- **Express 5.x** (note: v5, not v4)
-- **Mongoose 8.x** for MongoDB ODM
-- Cookie parser and CORS middleware included
+- **Admin** - Full system access to manage vehicles, users and all bookings
+- **Customer** - Can register, view vehicles, create/manage own bookings
 
-## Development Notes
+### Authentication Flow
 
-- The project currently has a minimal structure with only the core setup files
-- No routes, controllers, models, or services layers exist yet
-- When adding new features, follow Express best practices for organizing routes and middleware
-- MongoDB connection uses `mongoose.connect()` - ensure MongoDB is running locally or adjust DB_URI
+1. Passwords are hashed using bcrypt before storage into the database
+2. User login via `/api/v1/auth/signin` and receives a JWT (JSON Web Token)
+3. Protected endpoints require token in header: `Authorization: Bearer <token>`
+4. Validates the token and checks user permissions
+5. Access granted if authorized, otherwise returns 401 (Unauthorized) or 403 (Forbidden)
+
+---
+
+## 🌐 API Endpoints
+
+> 📖 **For detailed request/response specifications, see the [API Reference](API_REFERENCE.md)**
+
+> ⚠️ **IMPORTANT:** All API endpoint implementations **MUST** exactly match the specifications defined in **[API Reference](API_REFERENCE.md)**. This includes:
+>
+> - Exact URL patterns (e.g., `/api/v1/vehicles/:vehicleId`)
+> - Request body structure and field names
+> - Response format and data structure
+
+### Authentication
+
+| Method | Endpoint              | Access | Description                 |
+| ------ | --------------------- | ------ | --------------------------- |
+| POST   | `/api/v1/auth/signup` | Public | Register new user account   |
+| POST   | `/api/v1/auth/signin` | Public | Login and receive JWT token |
+
+---
+
+### Vehicles
+
+| Method | Endpoint                      | Access     | Description                                                                             |
+| ------ | ----------------------------- | ---------- | --------------------------------------------------------------------------------------- |
+| POST   | `/api/v1/vehicles`            | Admin only | Add new vehicle with name, type, registration, daily rent price and availability status |
+| GET    | `/api/v1/vehicles`            | Public     | View all vehicles in the system                                                         |
+| GET    | `/api/v1/vehicles/:vehicleId` | Public     | View specific vehicle details                                                           |
+| PUT    | `/api/v1/vehicles/:vehicleId` | Admin only | Update vehicle details, daily rent price or availability status                         |
+| DELETE | `/api/v1/vehicles/:vehicleId` | Admin only | Delete vehicle (only if no active bookings exist)                                       |
+
+---
+
+### Users
+
+| Method | Endpoint                | Access       | Description                                                                   |
+| ------ | ----------------------- | ------------ | ----------------------------------------------------------------------------- |
+| GET    | `/api/v1/users`         | Admin only   | View all users in the system                                                  |
+| PUT    | `/api/v1/users/:userId` | Admin or Own | Admin: Update any user's role or details<br>Customer: Update own profile only |
+| DELETE | `/api/v1/users/:userId` | Admin only   | Delete user (only if no active bookings exist)                                |
+
+---
+
+### Bookings
+
+| Method | Endpoint                      | Access            | Description                                                                                                                                                         |
+| ------ | ----------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/api/v1/bookings`            | Customer or Admin | Create booking with start/end dates<br>• Validates vehicle availability<br>• Calculates total price (daily rate × duration)<br>• Updates vehicle status to "booked" |
+| GET    | `/api/v1/bookings`            | Role-based        | Admin: View all bookings<br>Customer: View own bookings only                                                                                                        |
+| PUT    | `/api/v1/bookings/:bookingId` | Role-based        | Customer: Cancel booking (before start date only)<br>Admin: Mark as "returned" (updates vehicle to "available")<br>System: Auto-mark as "returned" when period ends |
+
+---
