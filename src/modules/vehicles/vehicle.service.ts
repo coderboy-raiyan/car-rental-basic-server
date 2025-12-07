@@ -64,11 +64,23 @@ const updateVehicle = async (id: string, payload: Partial<TVehicle>) => {
     return result?.rows[0];
 };
 
+const deleteVehicle = async (id: string) => {
+    const vehicle = await pool.query(`SELECT id from vehicles WHERE id=$1`, [id]);
+
+    if (!vehicle?.rowCount) {
+        throw new AppError(StatusCodes.NOT_FOUND, 'Vehicle not found!');
+    }
+
+    const deletedVehicle = await pool.query(`DELETE FROM vehicles WHERE id=$1 RETURNING *`, [id]);
+    return deletedVehicle;
+};
+
 const VehicleServices = {
     createVehicle,
     getAllVehicles,
     getSingleVehicle,
     updateVehicle,
+    deleteVehicle,
 };
 
 export default VehicleServices;
