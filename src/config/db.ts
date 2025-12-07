@@ -42,7 +42,7 @@ export const initDB = async () => {
             );
             CREATE TABLE IF NOT EXISTS vehicles (
                 id SERIAL PRIMARY KEY,
-                vehicle VARCHAR(100) NOT NULL,
+                vehicle_name VARCHAR(100) NOT NULL,
                 type vehicle_type NOT NULL,
                 registration_number TEXT UNIQUE NOT NULL,
                 daily_rent_price INT CHECK(daily_rent_price >= 0) NOT NULL,

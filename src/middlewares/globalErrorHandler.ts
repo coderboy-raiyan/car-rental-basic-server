@@ -5,9 +5,14 @@ import { StatusCodes } from 'http-status-codes';
 import AppError from '../error/AppError';
 
 function globalErrorHandler(err: any, req: Request, res: Response, next: NextFunction) {
-    let statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
-    let message = 'Something went wrong!';
-    let errors = [];
+    let statusCode = err?.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    let message = err?.message || 'Something went wrong!';
+    let errors = [
+        {
+            path: '',
+            message: err?.message,
+        },
+    ];
     if (err instanceof AppError) {
         statusCode = err?.statusCode;
         message = err?.message;
