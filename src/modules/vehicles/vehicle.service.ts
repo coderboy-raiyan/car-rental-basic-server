@@ -42,6 +42,9 @@ const getSingleVehicle = async (id: string) => {
 };
 
 const updateVehicle = async (id: string, payload: Partial<TVehicle>) => {
+    if (!Object.keys(payload)?.length) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Please provide data');
+    }
     const vehicle = await pool.query(`SELECT id from vehicles WHERE id=$1`, [id]);
 
     if (!vehicle?.rowCount) {

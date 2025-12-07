@@ -13,5 +13,6 @@ UserRouter.put(
     UserMiddleWares.verifyIdentity,
     UserControllers.updateUser
 );
+UserRouter.delete('/:userId', verifyAuth(UserConstants.Roles.admin), UserControllers.deleteUser);
 
 export default UserRouter;

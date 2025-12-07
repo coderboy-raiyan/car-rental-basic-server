@@ -23,10 +23,20 @@ const updateUser = CatchAsyncError(async (req: Request, res: Response) => {
         data,
     });
 });
+const deleteUser = CatchAsyncError(async (req: Request, res: Response) => {
+    await UserServices.deleteUser(req?.params?.userId);
+
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: 'User deleted successfully',
+    });
+});
 
 const UserControllers = {
     getUsers,
     updateUser,
+    deleteUser,
 };
 
 export default UserControllers;
