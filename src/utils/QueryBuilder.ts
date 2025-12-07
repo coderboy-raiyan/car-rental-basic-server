@@ -1,4 +1,9 @@
-export function UpdateQueryBuilder<T>(searchParam: string | number, payload: T, keys: string[]) {
+export function UpdateQueryBuilder<T>(
+    table: string,
+    searchParam: string | number,
+    payload: T,
+    keys: string[]
+) {
     const fields = [];
     const values = [];
     let variableCount = 1;
@@ -14,7 +19,7 @@ export function UpdateQueryBuilder<T>(searchParam: string | number, payload: T, 
     });
     values.push(searchParam);
     const query = `
-            UPDATE vehicles SET ${fields.join(', ')} WHERE id=$${variableCount} RETURNING *
+            UPDATE ${table} SET ${fields.join(', ')} WHERE id=$${variableCount} RETURNING *
             `;
 
     return { query, values };

@@ -48,7 +48,7 @@ const updateVehicle = async (id: string, payload: Partial<TVehicle>) => {
         throw new AppError(StatusCodes.NOT_FOUND, 'Vehicle not found!');
     }
 
-    const { query, values } = UpdateQueryBuilder(id, payload, [
+    const { query, values } = UpdateQueryBuilder('vehicles', id, payload, [
         'vehicle_name',
         'type',
         'registration_number',
