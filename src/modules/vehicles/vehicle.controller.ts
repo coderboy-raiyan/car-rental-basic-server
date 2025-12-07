@@ -48,11 +48,30 @@ const getSingleVehicle = CatchAsyncError(async (req: Request, res: Response) => 
         data: data?.rows[0],
     });
 });
+const updateVehicle = CatchAsyncError(async (req: Request, res: Response) => {
+    const data = await VehicleServices.updateVehicle(req?.params?.vehicleId, req.body);
+
+    // if (!data?.rowCount) {
+    //     return sendResponse(res, {
+    //         statusCode: StatusCodes.OK,
+    //         success: true,
+    //         message: 'No vehicles found',
+    //         data: {},
+    //     });
+    // }
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: 'Vehicle updated successfully',
+        data,
+    });
+});
 
 const VehicleControllers = {
     createVehicle,
     getVehicles,
     getSingleVehicle,
+    updateVehicle,
 };
 
 export default VehicleControllers;

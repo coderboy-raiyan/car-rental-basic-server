@@ -1,4 +1,7 @@
+import { StatusCodes } from 'http-status-codes';
 import { pool } from '../../config/db';
+import AppError from '../../error/AppError';
+import { UpdateQueryBuilder } from '../../utils/QueryBuilder';
 import { TVehicle } from './vehicle.interface';
 
 const createVehicle = async ({
@@ -38,10 +41,34 @@ const getSingleVehicle = async (id: string) => {
     return vehicle;
 };
 
+const updateVehicle = async (id: string, payload: Partial<TVehicle>) => {
+    const vehicle = await pool.query(`SELECT id from vehicles WHERE id=$1`, [id]);
+
+    if (!vehicle?.rowCount) {
+        throw new AppError(StatusCodes.NOT_FOUND, 'Vehicle not found!');
+    }
+
+    const { fields, values, variableCount } = UpdateQueryBuilder(payload, [
+        'vehicle_name',
+        'type',
+        'registration_number',
+        'daily_rent_price',
+        'availability_status',
+    ]);
+    values.push(id);
+    const query = `
+        UPDATE vehicles SET ${fields.join(', ')} WHERE id=$${variableCount} RETURNING *
+        `;
+
+    const result = await pool.query(query, values);
+    return result?.rows[0];
+};
+
 const VehicleServices = {
     createVehicle,
     getAllVehicles,
     getSingleVehicle,
+    updateVehicle,
 };
 
 export default VehicleServices;
