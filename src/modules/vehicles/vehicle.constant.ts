@@ -1,6 +1,6 @@
 const availabilityStatus = {
     available: 'available',
-    customer: 'customer',
+    booked: 'booked',
 } as const;
 
 const vehicleType = {
