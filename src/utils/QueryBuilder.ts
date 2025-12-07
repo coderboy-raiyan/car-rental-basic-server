@@ -1,4 +1,4 @@
-export function UpdateQueryBuilder<T>(payload: T, keys: string[]) {
+export function UpdateQueryBuilder<T>(searchParam: string | number, payload: T, keys: string[]) {
     const fields = [];
     const values = [];
     let variableCount = 1;
@@ -12,6 +12,10 @@ export function UpdateQueryBuilder<T>(payload: T, keys: string[]) {
             variableCount++;
         }
     });
+    values.push(searchParam);
+    const query = `
+            UPDATE vehicles SET ${fields.join(', ')} WHERE id=$${variableCount} RETURNING *
+            `;
 
-    return { fields, values, variableCount };
+    return { query, values };
 }

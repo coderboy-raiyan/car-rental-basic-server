@@ -27,7 +27,7 @@ const getVehicles = CatchAsyncError(async (req: Request, res: Response) => {
         statusCode: StatusCodes.OK,
         success: true,
         message: 'Vehicles retrieved successfully',
-        data: data?.rows[0],
+        data: data?.rows,
     });
 });
 const getSingleVehicle = CatchAsyncError(async (req: Request, res: Response) => {

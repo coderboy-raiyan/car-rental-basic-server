@@ -22,13 +22,13 @@ const createVehicle = async ({
 };
 
 const getAllVehicles = async () => {
-    const vehicle = await pool.query(
+    const vehicles = await pool.query(
         `
             SELECT * FROM vehicles 
         `
     );
 
-    return vehicle;
+    return vehicles;
 };
 const getSingleVehicle = async (id: string) => {
     const vehicle = await pool.query(
@@ -48,17 +48,13 @@ const updateVehicle = async (id: string, payload: Partial<TVehicle>) => {
         throw new AppError(StatusCodes.NOT_FOUND, 'Vehicle not found!');
     }
 
-    const { fields, values, variableCount } = UpdateQueryBuilder(payload, [
+    const { query, values } = UpdateQueryBuilder(id, payload, [
         'vehicle_name',
         'type',
         'registration_number',
         'daily_rent_price',
         'availability_status',
     ]);
-    values.push(id);
-    const query = `
-        UPDATE vehicles SET ${fields.join(', ')} WHERE id=$${variableCount} RETURNING *
-        `;
 
     const result = await pool.query(query, values);
     return result?.rows[0];
