@@ -4,7 +4,7 @@ A robust backend API for managing vehicle rentals, built with modern technologie
 
 ## 🌐 Live URL
 
-**Live API:** [Add your deployment URL here]
+**Live API:** [https://car-rental-base.vercel.app/api/v1]
 
 **GitHub Repository:** [https://github.com/coderboy-raiyan/car-rental-basic-server](https://github.com/coderboy-raiyan/car-rental-basic-server)
 
@@ -302,10 +302,6 @@ Content-Type: application/json
 
 ## 📚 API Documentation
 
-For complete API documentation with detailed request/response specifications, please refer to:
-
-- **[API Reference](https://github.com/coderboy-raiyan/car-rental-basic-server/blob/main/API_REFERENCE.md)** - Comprehensive endpoint documentation
-
 ### Quick Reference
 
 | Category     | Endpoints                      | Access                                |
@@ -368,9 +364,7 @@ car-rental-basic-server/
 
 To test the API endpoints, you can use tools like:
 
-- **Postman** - [Download Collection](link-to-postman-collection)
-- **Thunder Client** - VS Code extension
-- **cURL** - Command line tool
+- **Postman** - [Download Collection](/car_rental_postman_collection.json)
 
 ---
 
@@ -387,35 +381,17 @@ This project implements several security measures:
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 👨‍💻 Author
 
 **Coderboy Raiyan**
 
 - GitHub: [@coderboy-raiyan](https://github.com/coderboy-raiyan)
+- Linkedin: [@tajkier-haque](https://www.linkedin.com/in/tajkier-haque)
 
 ---
 
 ## 🙏 Acknowledgments
 
-- Apollo Level 2 Web Development Course
 - Express.js community
 - PostgreSQL community
 - Neon Database team
