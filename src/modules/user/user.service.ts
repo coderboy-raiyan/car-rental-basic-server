@@ -35,6 +35,13 @@ const updateUser = async (id: string | number, payload: Partial<TUser>) => {
 };
 
 const deleteUser = async (id: string | number) => {
+    const checkUserHasBooking = await pool.query(
+        `SELECT customer_id FROM bookings WHERE customer_id=$1`,
+        [id]
+    );
+    if (checkUserHasBooking?.rowCount) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'User has a booking to complete');
+    }
     const deletedUser = await pool.query(`DELETE FROM users WHERE id=$1 RETURNING name,email`, [
         id,
     ]);

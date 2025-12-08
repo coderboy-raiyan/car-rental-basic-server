@@ -28,7 +28,7 @@ const createBooking = async (payload: Partial<TBooking>, user: TUser) => {
     }
     // check if already booked or not
     if (vehicle?.rows[0]?.availability_status === VehicleConstants.availabilityStatus.booked) {
-        throw new AppError(StatusCodes.BAD_REQUEST, 'Car not available');
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Car is not available');
     }
 
     if (new Date(rent_end_date) < new Date(rent_start_date)) {
@@ -69,8 +69,58 @@ const createBooking = async (payload: Partial<TBooking>, user: TUser) => {
     return modifiedObj;
 };
 
+const getBookings = async (user: TUser) => {
+    if (user?.role === UserConstants.Roles.admin) {
+        const bookings = await pool.query(`SELECT *  FROM bookings`);
+        return bookings?.rows;
+    } else {
+        const booking = await pool?.query(`SELECT * FROM bookings WHERE customer_id=$1`, [
+            user?.id,
+        ]);
+        if (!booking?.rowCount) {
+            throw new AppError(StatusCodes.NOT_FOUND, "You haven't booked a car!");
+        }
+        return booking?.rows[0];
+    }
+};
+
+const updateBooking = async (bookingId: string, user: TUser) => {
+    const booking = await pool?.query(`SELECT * FROM bookings WHERE id=$1`, [bookingId]);
+
+    if (!booking?.rowCount) {
+        throw new AppError(StatusCodes.NOT_FOUND, 'Booking not found!');
+    }
+
+    if (booking?.rows[0]?.customer_id !== user?.id && user.role !== UserConstants.Roles.admin) {
+        throw new AppError(StatusCodes.NOT_FOUND, 'Please signin to your account!');
+    }
+
+    if (new Date(booking?.rows[0]?.rent_start_date) > new Date()) {
+        throw new AppError(StatusCodes.BAD_REQUEST, "You can't cancel booking until it starts!");
+    }
+
+    const updatedBooking = await pool?.query(
+        `UPDATE bookings SET status=$1 WHERE id=$2 RETURNING *`,
+        [BookingConstants.BookingStatus.returned, bookingId]
+    );
+
+    const updatedVehicle = await pool?.query(
+        `UPDATE vehicles SET availability_status=$1 WHERE id=$2 RETURNING availability_status`,
+        [VehicleConstants.availabilityStatus.available, booking?.rows[0]?.vehicle_id]
+    );
+
+    return {
+        ...updatedBooking?.rows[0],
+        vehicle: {
+            availability_status: updatedVehicle?.rows[0]?.availability_status,
+        },
+    };
+};
+
 const BookingServices = {
     createBooking,
+    getBookings,
+    updateBooking,
 };
 
 export default BookingServices;

@@ -11,4 +11,15 @@ BookingRouter.post(
     BookingControllers.createBooking
 );
 
+BookingRouter.get(
+    '/',
+    verifyAuth(UserConstants.Roles.admin, UserConstants.Roles.customer),
+    BookingControllers.getBookings
+);
+BookingRouter.put(
+    '/:bookingId',
+    verifyAuth(UserConstants.Roles.admin, UserConstants.Roles.customer),
+    BookingControllers.updateBooking
+);
+
 export default BookingRouter;
