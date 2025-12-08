@@ -1,134 +1,425 @@
 # 🚗 Vehicle Rental System
 
-## 🎯 Project Overview
+A robust backend API for managing vehicle rentals, built with modern technologies and best practices. This system provides comprehensive functionality for vehicle inventory management, customer bookings, and secure role-based authentication.
 
-A backend API for a vehicle rental management system that handles:
+## 🌐 Live URL
 
-- **Vehicles** - Manage vehicle inventory with availability tracking
-- **Customers** - Manage customer accounts and profiles
-- **Bookings** - Handle vehicle rentals, returns and cost calculation
-- **Authentication** - Secure role-based access control (Admin and Customer roles)
+**Live API:** [Add your deployment URL here]
+
+**GitHub Repository:** [https://github.com/coderboy-raiyan/car-rental-basic-server](https://github.com/coderboy-raiyan/car-rental-basic-server)
+
+---
+
+## ✨ Features
+
+### 🔐 Authentication & Authorization
+
+- Secure user registration and login with JWT authentication
+- Role-based access control (Admin and Customer roles)
+- Password encryption using bcrypt
+- Protected routes with token validation
+
+### 🚙 Vehicle Management
+
+- Create, read, update, and delete vehicle records (Admin only)
+- Track vehicle availability status (available/booked)
+- Support for multiple vehicle types (Car, Bike, Van, SUV)
+- Public vehicle listing and detailed view
+
+### 👥 User Management
+
+- Admin can view and manage all users
+- Users can update their own profiles
+- Safe deletion with active booking validation
+- Role management capabilities
+
+### 📅 Booking System
+
+- Create bookings with automatic price calculation
+- Automatic vehicle availability updates
+- Role-based booking views (Admin sees all, Customer sees own)
+- Booking status management (active, cancelled, returned)
+- Auto-return functionality when rental period ends
+- Cancel booking with automatic vehicle availability restoration
+
+### 🛡️ Security Features
+
+- JWT-based authentication
+- Password hashing with bcrypt
+- Role-based authorization
+- Input validation and sanitization
+- Protected API endpoints
 
 ---
 
 ## 🛠️ Technology Stack
 
-- **Node.js** + **TypeScript**
-- **Express.js** (web framework)
-- **PostgreSQL** (database)
-- **bcrypt** (password hashing)
-- **jsonwebtoken** (JWT authentication)
+### Backend Framework
+
+- **Node.js** - Runtime environment
+- **TypeScript** - Type-safe JavaScript
+- **Express.js** - Web application framework
+
+### Database
+
+- **PostgreSQL** - Relational database
+- **Neon** - Serverless Postgres platform
+
+### Authentication & Security
+
+- **jsonwebtoken** - JWT implementation
+- **bcrypt** - Password hashing
+
+### Development Tools
+
+- **Bun** - Fast JavaScript runtime and package manager
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
 
 ---
 
-## 📁 Code Structure
+## 📋 Prerequisites
 
-> **IMPORTANT:** Your implementation **MUST** follow a **modular pattern** with clear separation of concerns. Organize your code into feature-based modules (e.g., auth, users, vehicles, bookings) with proper layering (routes, controllers, services).
+Before you begin, ensure you have the following installed:
 
----
-
-## 📊 Database Tables
-
-### Users
-
-| Field    | Notes                       |
-| -------- | --------------------------- |
-| id       | Auto-generated              |
-| name     | Required                    |
-| email    | Required, unique, lowercase |
-| password | Required, min 6 characters  |
-| phone    | Required                    |
-| role     | 'admin' or 'customer'       |
-
-### Vehicles
-
-| Field               | Notes                         |
-| ------------------- | ----------------------------- |
-| id                  | Auto-generated                |
-| vehicle_name        | Required                      |
-| type                | 'car', 'bike', 'van' or 'SUV' |
-| registration_number | Required, unique              |
-| daily_rent_price    | Required, positive            |
-| availability_status | 'available' or 'booked'       |
-
-### Bookings
-
-| Field           | Notes                               |
-| --------------- | ----------------------------------- |
-| id              | Auto-generated                      |
-| customer_id     | Links to Users table                |
-| vehicle_id      | Links to Vehicles table             |
-| rent_start_date | Required                            |
-| rent_end_date   | Required, must be after start date  |
-| total_price     | Required, positive                  |
-| status          | 'active', 'cancelled' or 'returned' |
+- **Node.js** (v18 or higher) or **Bun** (v1.0 or higher)
+- **PostgreSQL** (v14 or higher) or a Neon database account
+- **npm** or **bun** package manager
 
 ---
 
-## 🔐 Authentication & Authorization
+## 🚀 Setup Instructions
 
-### User Roles
+### 1. Clone the Repository
 
-- **Admin** - Full system access to manage vehicles, users and all bookings
-- **Customer** - Can register, view vehicles, create/manage own bookings
+```bash
+git clone https://github.com/coderboy-raiyan/car-rental-basic-server.git
+cd car-rental-basic-server
+```
+
+### 2. Install Dependencies
+
+Using npm:
+
+```bash
+npm install
+```
+
+Or using Bun:
+
+```bash
+bun install
+```
+
+### 3. Environment Configuration
+
+Create a `.env` file in the root directory and add the following variables:
+
+```env
+# Database Configuration
+DATABASE_URL=your_postgresql_connection_string
+
+# JWT Configuration
+JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRES_IN=7d
+
+# Server Configuration
+PORT=5000
+NODE_ENV=development
+```
+
+**Example PostgreSQL Connection String:**
+
+```
+postgresql://username:password@localhost:5432/car_rental_db
+```
+
+**For Neon Database:**
+
+```
+postgresql://username:password@ep-xxxxx.region.neon.tech/dbname?sslmode=require
+```
+
+### 4. Database Setup
+
+Run the following SQL commands to create the required tables:
+
+```sql
+-- Users Table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    role VARCHAR(20) DEFAULT 'customer' CHECK (role IN ('admin', 'customer')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Vehicles Table
+CREATE TABLE vehicles (
+    id SERIAL PRIMARY KEY,
+    vehicle_name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL CHECK (type IN ('car', 'bike', 'van', 'SUV')),
+    registration_number VARCHAR(50) UNIQUE NOT NULL,
+    daily_rent_price DECIMAL(10, 2) NOT NULL CHECK (daily_rent_price > 0),
+    availability_status VARCHAR(20) DEFAULT 'available' CHECK (availability_status IN ('available', 'booked')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bookings Table
+CREATE TABLE bookings (
+    id SERIAL PRIMARY KEY,
+    customer_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE,
+    rent_start_date DATE NOT NULL,
+    rent_end_date DATE NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL CHECK (total_price > 0),
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'cancelled', 'returned')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CHECK (rent_end_date > rent_start_date)
+);
+```
+
+### 5. Start the Development Server
+
+Using npm:
+
+```bash
+npm run dev
+```
+
+Or using Bun:
+
+```bash
+bun run dev
+```
+
+The server will start at `http://localhost:5000` (or your configured PORT).
+
+### 6. Build for Production
+
+Using npm:
+
+```bash
+npm run build
+npm start
+```
+
+Or using Bun:
+
+```bash
+bun run build
+bun start
+```
+
+---
+
+## 📖 Usage Instructions
+
+### API Base URL
+
+```
+http://localhost:5000/api/v1
+```
 
 ### Authentication Flow
 
-1. Passwords are hashed using bcrypt before storage into the database
-2. User login via `/api/v1/auth/signin` and receives a JWT (JSON Web Token)
-3. Protected endpoints require token in header: `Authorization: Bearer <token>`
-4. Validates the token and checks user permissions
-5. Access granted if authorized, otherwise returns 401 (Unauthorized) or 403 (Forbidden)
+1. **Register a new user:**
+
+```bash
+POST /api/v1/auth/signup
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "securePassword123",
+  "phone": "01712345678",
+  "role": "customer"
+}
+```
+
+2. **Login to get JWT token:**
+
+```bash
+POST /api/v1/auth/signin
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "securePassword123"
+}
+```
+
+3. **Use the token for protected routes:**
+
+```bash
+GET /api/v1/bookings
+Authorization: Bearer <your_jwt_token>
+```
+
+### Example API Calls
+
+#### Create a Vehicle (Admin only)
+
+```bash
+POST /api/v1/vehicles
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "vehicle_name": "Toyota Camry 2024",
+  "type": "car",
+  "registration_number": "ABC-1234",
+  "daily_rent_price": 50,
+  "availability_status": "available"
+}
+```
+
+#### Get All Vehicles (Public)
+
+```bash
+GET /api/v1/vehicles
+```
+
+#### Create a Booking (Customer or Admin)
+
+```bash
+POST /api/v1/bookings
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "customer_id": 1,
+  "vehicle_id": 2,
+  "rent_start_date": "2024-01-15",
+  "rent_end_date": "2024-01-20"
+}
+```
 
 ---
 
-## 🌐 API Endpoints
+## 📚 API Documentation
 
-> 📖 **For detailed request/response specifications, see the [API Reference](API_REFERENCE.md)**
+For complete API documentation with detailed request/response specifications, please refer to:
 
-> ⚠️ **IMPORTANT:** All API endpoint implementations **MUST** exactly match the specifications defined in **[API Reference](API_REFERENCE.md)**. This includes:
->
-> - Exact URL patterns (e.g., `/api/v1/vehicles/:vehicleId`)
-> - Request body structure and field names
-> - Response format and data structure
+- **[API Reference](https://github.com/coderboy-raiyan/car-rental-basic-server/blob/main/API_REFERENCE.md)** - Comprehensive endpoint documentation
 
-### Authentication
+### Quick Reference
 
-| Method | Endpoint              | Access | Description                 |
-| ------ | --------------------- | ------ | --------------------------- |
-| POST   | `/api/v1/auth/signup` | Public | Register new user account   |
-| POST   | `/api/v1/auth/signin` | Public | Login and receive JWT token |
+| Category     | Endpoints                      | Access                                |
+| ------------ | ------------------------------ | ------------------------------------- |
+| **Auth**     | `/auth/signup`, `/auth/signin` | Public                                |
+| **Vehicles** | `/vehicles`, `/vehicles/:id`   | Public (GET), Admin (POST/PUT/DELETE) |
+| **Users**    | `/users`, `/users/:id`         | Admin only                            |
+| **Bookings** | `/bookings`, `/bookings/:id`   | Customer (own), Admin (all)           |
 
 ---
 
-### Vehicles
+## 🏗️ Project Structure
 
-| Method | Endpoint                      | Access     | Description                                                                             |
-| ------ | ----------------------------- | ---------- | --------------------------------------------------------------------------------------- |
-| POST   | `/api/v1/vehicles`            | Admin only | Add new vehicle with name, type, registration, daily rent price and availability status |
-| GET    | `/api/v1/vehicles`            | Public     | View all vehicles in the system                                                         |
-| GET    | `/api/v1/vehicles/:vehicleId` | Public     | View specific vehicle details                                                           |
-| PUT    | `/api/v1/vehicles/:vehicleId` | Admin only | Update vehicle details, daily rent price or availability status                         |
-| DELETE | `/api/v1/vehicles/:vehicleId` | Admin only | Delete vehicle (only if no active bookings exist)                                       |
+```
+car-rental-basic-server/
+├── src/
+│   ├── modules/
+│   │   ├── auth/
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.service.ts
+│   │   │   ├── auth.routes.ts
+│   │   │   └── auth.validation.ts
+│   │   ├── vehicles/
+│   │   │   ├── vehicle.controller.ts
+│   │   │   ├── vehicle.service.ts
+│   │   │   ├── vehicle.routes.ts
+│   │   │   └── vehicle.validation.ts
+│   │   ├── users/
+│   │   │   ├── user.controller.ts
+│   │   │   ├── user.service.ts
+│   │   │   ├── user.routes.ts
+│   │   │   └── user.validation.ts
+│   │   └── bookings/
+│   │       ├── booking.controller.ts
+│   │       ├── booking.service.ts
+│   │       ├── booking.routes.ts
+│   │       └── booking.validation.ts
+│   ├── middleware/
+│   │   ├── auth.middleware.ts
+│   │   ├── error.middleware.ts
+│   │   └── validation.middleware.ts
+│   ├── config/
+│   │   └── database.ts
+│   ├── utils/
+│   │   ├── jwt.util.ts
+│   │   └── response.util.ts
+│   ├── types/
+│   │   └── index.ts
+│   └── app.ts
+├── .env
+├── .gitignore
+├── package.json
+├── tsconfig.json
+└── README.md
+```
 
 ---
 
-### Users
+## 🧪 Testing
 
-| Method | Endpoint                | Access       | Description                                                                   |
-| ------ | ----------------------- | ------------ | ----------------------------------------------------------------------------- |
-| GET    | `/api/v1/users`         | Admin only   | View all users in the system                                                  |
-| PUT    | `/api/v1/users/:userId` | Admin or Own | Admin: Update any user's role or details<br>Customer: Update own profile only |
-| DELETE | `/api/v1/users/:userId` | Admin only   | Delete user (only if no active bookings exist)                                |
+To test the API endpoints, you can use tools like:
+
+- **Postman** - [Download Collection](link-to-postman-collection)
+- **Thunder Client** - VS Code extension
+- **cURL** - Command line tool
+
+---
+
+## 🔒 Security Best Practices
+
+This project implements several security measures:
+
+1. **Password Security**: All passwords are hashed using bcrypt before storage
+2. **JWT Authentication**: Secure token-based authentication with expiration
+3. **Role-Based Access**: Different permission levels for Admin and Customer
+4. **Input Validation**: All inputs are validated before processing
+5. **SQL Injection Prevention**: Using parameterized queries
+6. **Environment Variables**: Sensitive data stored in .env file
 
 ---
 
-### Bookings
+## 🤝 Contributing
 
-| Method | Endpoint                      | Access            | Description                                                                                                                                                         |
-| ------ | ----------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| POST   | `/api/v1/bookings`            | Customer or Admin | Create booking with start/end dates<br>• Validates vehicle availability<br>• Calculates total price (daily rate × duration)<br>• Updates vehicle status to "booked" |
-| GET    | `/api/v1/bookings`            | Role-based        | Admin: View all bookings<br>Customer: View own bookings only                                                                                                        |
-| PUT    | `/api/v1/bookings/:bookingId` | Role-based        | Customer: Cancel booking (before start date only)<br>Admin: Mark as "returned" (updates vehicle to "available")<br>System: Auto-mark as "returned" when period ends |
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👨‍💻 Author
+
+**Coderboy Raiyan**
+
+- GitHub: [@coderboy-raiyan](https://github.com/coderboy-raiyan)
+
+---
+
+## 🙏 Acknowledgments
+
+- Apollo Level 2 Web Development Course
+- Express.js community
+- PostgreSQL community
+- Neon Database team
+
+---
+
+**Made with ❤️ by Coderboy Raiyan**
