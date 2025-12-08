@@ -4,7 +4,7 @@ A robust backend API for managing vehicle rentals, built with modern technologie
 
 ## 🌐 Live URL
 
-**Live API:** [https://car-rental-base.vercel.app/api/v1]
+**Live API:** [https://car-rental-base.vercel.app]
 
 **GitHub Repository:** [https://github.com/coderboy-raiyan/car-rental-basic-server](https://github.com/coderboy-raiyan/car-rental-basic-server)
 
