@@ -3,8 +3,8 @@
     "module": "index.ts",
     "private": true,
     "scripts": {
-        "dev": "bun --watch src/server.ts",
-        "build": "tsc",
+        "dev": "rm -rf package-lock.json && bun install && bun --watch src/server.ts",
+        "build": "rm -rf bun.lock && npm install && rm -rf dist && tsc",
         "start": "node dist/src/server.js",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",

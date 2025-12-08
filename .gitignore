@@ -1,6 +1,6 @@
 # dependencies (bun install)
 node_modules
-
+dist
 # output
 out
 dist
@@ -41,3 +41,4 @@ composer.lock
 Gemfile.lock
 poetry.lock
 Pipfile.lock
+.vercel
